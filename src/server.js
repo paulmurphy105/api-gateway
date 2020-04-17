@@ -3,7 +3,6 @@ var bodyParser = require('body-parser')
 
 const authenticateReq = require('./middleware/authMiddleware')
 const attachTokens = require('./middleware/attachTokens')
-
 const tokenSigner = require('./utils/tokenSigner')
 
 const app = express()
