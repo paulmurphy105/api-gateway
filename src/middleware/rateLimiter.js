@@ -2,6 +2,8 @@
 const { promisify } = require("util");
 const md5 = require('md5');
 
+const customError = require('../utils/CustomErrors')
+
 module.exports = (redis) => {
   const getAsync = promisify(redis.get).bind(redis);
   const setAsync = promisify(redis.set).bind(redis);
@@ -12,26 +14,27 @@ module.exports = (redis) => {
   return async (req, res, next) => {
     const hash = md5(req.headers);
 
-    const [cacheEntry, ttl] = await Promise.all([getAsync(hash), ttlAsync(hash)])
-    console.log(cacheEntry, ttl);
-
+    const [cacheEntryString, ttl] = await Promise.all([getAsync(hash), ttlAsync(hash)])
+    const cacheEntry = JSON.parse(cacheEntryString);
 
     if (cacheEntry && ttl > 0) {
-      if (hitLimit(cacheEntry)) {
-        console.log('You have hit your damn limit');
+      const elapsedSec = (Date.now() -  cacheEntry.lastHit) / 1000
+      const tokensToAdd = Math.floor(elapsedSec / 15) // Add 1 token every 15 seconds since last request
+      const newCacheLimit = cacheEntry.counter + tokensToAdd;
 
-        const rateLimitError = new Error('You have hit your rate limit')
-        rateLimitError.status = 429
+      console.log(`elapsed: ${elapsedSec}`);
+      console.log(`tokensToAdd: ${tokensToAdd}`);
+      console.log(`newCacheLimit: ${newCacheLimit}`);
 
-        next(rateLimitError)
+      if (hitLimit(newCacheLimit)) {
+        next(customError('You have hit your rate limit', 429))
       } else {
-        const newValue = cacheEntry - 1;
-        await setAsync(hash, newValue, 'EX', 60)
+        await setAsync(hash, JSON.stringify({ counter: newCacheLimit - 1, lastHit: Date.now() }), 'EX', 60)
       }
     }
 
     if (!cacheEntry) {
-      await setAsync(hash, 5, 'EX', 60)
+      await setAsync(hash, JSON.stringify({ counter: 3, lastHit: Date.now() }), 'EX', 60)
     }
 
     next();

@@ -1,11 +1,9 @@
 const tokenVerify = require('./verifyTokens')
+const customError = require('../utils/CustomErrors')
 
 module.exports = (req, res, next) => {
   if (!req || !req.tokens) {
-    const error = new Error('No tokens provided')
-    error.status = 401
-
-    throw error
+    throw customError('No tokens provided', 401)
   }
 
   tokenVerify(req.tokens.authToken)

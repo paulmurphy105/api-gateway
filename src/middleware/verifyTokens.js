@@ -17,8 +17,5 @@ module.exports = (token) => {
   QbviswutnTI49DNbE/l4UVRT8OaONNSfcHwsbiwjUfvO
   -----END RSA PRIVATE KEY-----`
 
-  console.log(token);
-
-
   return jwt.verify(token, privateKey)
 }
