@@ -1,3 +1,3 @@
 module.exports = {
-  'downstreamAPITarget': 'https://downstreamApi.com'
+  'downstreamAPITarget': 'http://local.telus.com:4059'
 }
