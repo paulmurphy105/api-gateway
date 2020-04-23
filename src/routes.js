@@ -41,7 +41,9 @@ module.exports = (app, proxy) => {
   // here is a very basic gateway
   app.all(/^\/api(\/.*)/, rateLimiter(redis), (req, res, next) => {
     if (!req.headers.target) res.status(400).send('No Target Specified');
+
     const target = dsPaths[req.headers.target];
+
     if (!target) res.status(400).send('Target not found');
 
     return proxy.proxyRequest(req, res, { target }); // would be a bit more complicated than this in reality

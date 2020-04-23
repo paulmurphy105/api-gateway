@@ -40,6 +40,7 @@ module.exports = (redis) => {
         return handleRateLimitExceeded(res, next)
       } else {
         await setAsync(userFingerprint, JSON.stringify({ counter: newCacheLimit - 1, lastHit: Date.now(), createdAt: cacheEntry.createdAt  }), 'EX', config.rateLimitTimer);
+
         rateLimitRemaining = newCacheLimit - 1;
         rateLimitReset = cacheEntry.createdAt + (60 * 1000);
       }
@@ -47,6 +48,7 @@ module.exports = (redis) => {
 
     if (!cacheEntry) {
       await setAsync(userFingerprint, JSON.stringify({ counter: config.rateLimitMaxHits, lastHit: Date.now(), createdAt: Date.now() }), 'EX', 60);
+
       rateLimitRemaining = config.rateLimitMaxHits;
       rateLimitReset = Date.now() + (60 * 1000);
     }
