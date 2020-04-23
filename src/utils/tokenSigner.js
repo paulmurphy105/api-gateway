@@ -1,5 +1,7 @@
-module.exports = () => {
-  const jwt = require('jsonwebtoken')
+const config = require('../config/')();
+
+module.exports = (id) => {
+  const jwt = require('jsonwebtoken');
   const { v4: uuidv4 } = require('uuid');
 
   const privateKey = `-----BEGIN RSA PRIVATE KEY-----
@@ -16,9 +18,7 @@ module.exports = () => {
   2tGYjoThKZg5RHJax3RUpb9fz7LfxtjH7A8sGWlo8N9gFFVf/9pwMLTYJLfsM/RG
   Tyh0XfR9swot/KYVcPECQQC8O2ZH6dOO4C+EOzKW8iM3fpGI7rqMqh8i7RNhJ71g
   QbviswutnTI49DNbE/l4UVRT8OaONNSfcHwsbiwjUfvO
-  -----END RSA PRIVATE KEY-----`
+  -----END RSA PRIVATE KEY-----`; // fake private key generated online. store me in vault
 
-  // would probably store the ID in REDIS, link to to a customer ID. maybe have redis too?
-
-  return jwt.sign({ id: uuidv4(), createdAt: Date.now() }, privateKey, { expiresIn: '10m'});
+  return jwt.sign({ id: uuidv4(), customerId: id,  createdAt: Date.now() }, privateKey, { expiresIn: config.token.cookieExpireHr});
 }

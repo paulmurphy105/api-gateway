@@ -1,5 +1,7 @@
-module.exports = (token) => {
-  const jwt = require('jsonwebtoken')
+const customError = require('../utils/CustomErrors');
+
+module.exports = (token, protectedByOAuth) => {
+  const jwt = require('jsonwebtoken');
 
   const privateKey = `-----BEGIN RSA PRIVATE KEY-----
   MIICXQIBAAKBgQCON0+CsIQ+GAjYH6jpWb/7mKCFUEV3kZOG1Xqm2o/rWaP+IBYk
@@ -15,7 +17,10 @@ module.exports = (token) => {
   2tGYjoThKZg5RHJax3RUpb9fz7LfxtjH7A8sGWlo8N9gFFVf/9pwMLTYJLfsM/RG
   Tyh0XfR9swot/KYVcPECQQC8O2ZH6dOO4C+EOzKW8iM3fpGI7rqMqh8i7RNhJ71g
   QbviswutnTI49DNbE/l4UVRT8OaONNSfcHwsbiwjUfvO
-  -----END RSA PRIVATE KEY-----`
+  -----END RSA PRIVATE KEY-----`; // this was generated online. do it properly.. and store in vault
 
-  return jwt.verify(token, privateKey)
+  const decodedToken = jwt.verify(token, privateKey);
+
+  // don't really think this is required to be honest
+  if (protectedByOAuth && !decodedToken.customerId) throw customError('authToken has no customerId. something fishy going on', 400)
 }

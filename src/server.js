@@ -1,14 +1,18 @@
-const express = require('express')
-var bodyParser = require('body-parser')
+const express = require('express');
+var bodyParser = require('body-parser');
+const { createProxyServer } = require('http-proxy');
 
-const attachTokens = require('./middleware/attachTokens')
-const routes = require('./routes')
+const config = require('./config/')()
+const attachTokens = require('./middleware/attachTokens');
+const routes = require('./routes');
 
-app.use(bodyParser.json())
-app.use(attachTokens)
+const app = express();
 
-const app = express()
+const proxy = createProxyServer();
 
-routes(app)
+app.use(bodyParser.json());
+app.use(attachTokens);
 
-app.listen(3008, () => console.log('app listening on 3008'));
+routes(app, proxy);
+
+app.listen(config.port, () => console.log(`app started on ${config.port}`));
